@@ -1,4 +1,3 @@
-cat > README.md <<'EOF'
 # Automotive Warranty Management Platform
 
 A Spring Boot microservices project for automotive warranty management.
