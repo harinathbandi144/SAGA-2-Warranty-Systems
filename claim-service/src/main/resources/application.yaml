@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: claim-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/claimdb
+    username: harinathbandi
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto:
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: claim_schema
+        format_sql: true
+
+  flyway:
+    enabled: true
+    schemas: claim_schema
+    default-schema: claim_schema
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
