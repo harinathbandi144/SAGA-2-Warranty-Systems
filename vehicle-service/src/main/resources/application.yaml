@@ -1,0 +1,19 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: vehicle-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/vehicledb
+    username: ${USERNAME}
+    password: ${PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
+    schemas: vehicle_schema
+    default-schema: vehicle_schema
