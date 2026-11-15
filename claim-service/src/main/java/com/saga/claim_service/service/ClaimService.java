@@ -1,5 +1,6 @@
 package com.saga.claim_service.service;
 
+import com.saga.claim_service.dto.ClaimHistoryResponse;
 import com.saga.claim_service.dto.ClaimResponse;
 import com.saga.claim_service.dto.CreateClaimRequest;
 import com.saga.claim_service.dto.UpdateClaimRequest;
@@ -19,4 +20,13 @@ public interface ClaimService {
     ClaimResponse updateClaim(Long id, UpdateClaimRequest request);
 
     ClaimResponse submitClaim(Long id);
+
+    ClaimResponse startReview(Long id);
+
+    ClaimResponse approveClaim(Long id);
+
+    ClaimResponse rejectClaim(Long id);
+
+    List<ClaimHistoryResponse> getClaimHistory(Long id);
+
 }

@@ -1,13 +1,16 @@
 package com.saga.claim_service.service;
 
 
+import com.saga.claim_service.dto.ClaimHistoryResponse;
 import com.saga.claim_service.dto.ClaimResponse;
 import com.saga.claim_service.dto.CreateClaimRequest;
 import com.saga.claim_service.dto.UpdateClaimRequest;
 import com.saga.claim_service.entity.Claim;
+import com.saga.claim_service.entity.ClaimStatusHistory;
 import com.saga.claim_service.enums.Status;
 import com.saga.claim_service.exception.ClaimNotFoundException;
 import com.saga.claim_service.repository.ClaimRepository;
+import com.saga.claim_service.repository.ClaimStatusHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -25,6 +27,8 @@ import java.util.UUID;
 public class ClaimServiceImpl implements ClaimService{
 
     private final ClaimRepository claimRepository;
+
+    private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
 
     @Override
     @Transactional
@@ -73,6 +77,7 @@ public class ClaimServiceImpl implements ClaimService{
     }
 
     @Override
+    @Transactional
     public ClaimResponse getClaimById(Long id) {
         Claim claim = claimRepository.findById(id).orElseThrow(()->
                 new ClaimNotFoundException("Claim Not Found with the Id: "+id));
@@ -80,6 +85,7 @@ public class ClaimServiceImpl implements ClaimService{
     }
 
     @Override
+    @Transactional
     public ClaimResponse updateClaim(Long id, UpdateClaimRequest request) {
         Claim claim = claimRepository.findById(id).
                 orElseThrow(() ->
@@ -100,17 +106,72 @@ public class ClaimServiceImpl implements ClaimService{
     }
 
     @Override
+    @Transactional
     public ClaimResponse submitClaim(Long id) {
-        Claim claim = claimRepository.findById(id).orElseThrow(() ->
-                new ClaimNotFoundException("Claim is not found with id : "+id));
+        return changeStatus(id, Status.DRAFT, Status.SUBMITTED);
+    }
 
-        if (claim.getStatus() != Status.DRAFT){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only DRAFT claims can be submitted");
+    @Override
+    @Transactional
+    public ClaimResponse startReview(Long id) {
+        return changeStatus(
+                id, Status.SUBMITTED, Status.UNDER_REVIEW
+        );
+    }
+
+    @Override
+    @Transactional
+    public ClaimResponse approveClaim(Long id) {
+        return changeStatus(
+                id, Status.UNDER_REVIEW, Status.APPROVED
+        );
+    }
+
+    @Override
+    @Transactional
+    public ClaimResponse rejectClaim(Long id) {
+        return changeStatus(id, Status.UNDER_REVIEW, Status.REJECTED);
+    }
+
+    @Override
+    public List<ClaimHistoryResponse> getClaimHistory(Long id) {
+        if(!claimRepository.existsById(id)){
+            throw  new ClaimNotFoundException("Claim not found with ID: " + id);
         }
 
-        claim.setStatus(Status.SUBMITTED);
-        Claim saved = claimRepository.save(claim);
-        return toResponse(saved);
+        return claimStatusHistoryRepository.findByClaimIdOrderByChangedAtAscIdAsc(id)
+                .stream().map(history -> new ClaimHistoryResponse(
+                        history.getId(),
+                        history.getOldStatus(),
+                        history.getNewStatus(),
+                        history.getChangedAt())).toList();
+    }
+
+    private ClaimResponse changeStatus(Long id,
+                                       Status expectedStatus,
+                                       Status newStatus){
+
+        Claim claim = claimRepository.findById(id).orElseThrow(() -> new ClaimNotFoundException("Claim not found with ID : "+id));
+
+        if(claim.getStatus() != expectedStatus){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,  "Expected status " + expectedStatus
+                    + " but current status is " + claim.getStatus()
+            );
+        }
+
+        Status oldStatus = claim.getStatus();
+        claim.setStatus(newStatus);
+
+        ClaimStatusHistory history = new ClaimStatusHistory();
+
+        history.setClaim(claim);
+        history.setOldStatus(oldStatus);
+        history.setNewStatus(newStatus);
+
+        claimStatusHistoryRepository.save(history);
+        Claim updated = claimRepository.saveAndFlush(claim);
+
+        return toResponse(updated);
     }
 
     private ClaimResponse toResponse(Claim claim){
