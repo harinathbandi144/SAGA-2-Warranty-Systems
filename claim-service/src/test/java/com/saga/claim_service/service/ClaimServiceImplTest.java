@@ -1,6 +1,8 @@
 package com.saga.claim_service.service;
 
 
+import com.saga.claim_service.client.dto.WarrantyEligibilityResponse;
+import com.saga.claim_service.client.service.VehicleClient;
 import com.saga.claim_service.dto.ClaimResponse;
 import com.saga.claim_service.dto.CreateClaimRequest;
 import com.saga.claim_service.entity.Claim;
@@ -32,8 +34,12 @@ public class ClaimServiceImplTest {
     @Mock
     private ClaimStatusHistoryRepository claimStatusHistoryRepository;
 
+    @Mock
+    private VehicleClient vehicleClient;
+
     @InjectMocks
     private ClaimServiceImpl claimServiceImpl;
+
 
     @Test
     void getClaimById_whenClaimDoesNotExist_shouldThrowException(){
@@ -45,6 +51,11 @@ public class ClaimServiceImplTest {
 
     @Test
     void createClaim_whenValidRequest_shouldSaveAndReturnClaim(){
+
+        when(vehicleClient.checkEligibility(anyString()))
+                .thenReturn(new WarrantyEligibilityResponse( "1HGCM82633A004352",
+                        true,
+                        "Vehicle warranty is active"));
 
         // ARRANGE: Prepare test data
         //Create request data and configure mock repository

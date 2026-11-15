@@ -1,6 +1,8 @@
 package com.saga.claim_service.service;
 
 
+import com.saga.claim_service.client.dto.WarrantyEligibilityResponse;
+import com.saga.claim_service.client.service.VehicleClient;
 import com.saga.claim_service.dto.ClaimHistoryResponse;
 import com.saga.claim_service.dto.ClaimResponse;
 import com.saga.claim_service.dto.CreateClaimRequest;
@@ -11,6 +13,7 @@ import com.saga.claim_service.enums.Status;
 import com.saga.claim_service.exception.ClaimNotFoundException;
 import com.saga.claim_service.repository.ClaimRepository;
 import com.saga.claim_service.repository.ClaimStatusHistoryRepository;
+import com.saga.claim_service.resilanace4j.VehicleEligibilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,10 +33,20 @@ public class ClaimServiceImpl implements ClaimService{
 
     private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
 
+    private final VehicleClient vehicleClient;
+
+    private final VehicleEligibilityService vehicleEligibilityService;
+
+
     @Override
     @Transactional
     public ClaimResponse createClaim(CreateClaimRequest request) {
 
+        WarrantyEligibilityResponse eligibilityResponse = vehicleEligibilityService.checkEligibility(request.vin());
+
+        if(!eligibilityResponse.eligible()){
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT, eligibilityResponse.reason());
+        }
         Claim claim = new Claim();
 
         String claimNumber = "CLM" + UUID.randomUUID().toString().toUpperCase();
