@@ -1,5 +1,6 @@
 package com.saga.claim_service.controller;
 
+import com.saga.claim_service.dto.ClaimHistoryResponse;
 import com.saga.claim_service.dto.ClaimResponse;
 import com.saga.claim_service.dto.CreateClaimRequest;
 import com.saga.claim_service.dto.UpdateClaimRequest;
@@ -13,6 +14,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -61,4 +64,28 @@ public class ClaimController {
 
             return ResponseEntity.ok(response);
         }
+
+        @PostMapping("/{id}/start-review")
+        public ResponseEntity<ClaimResponse> startReview(@PathVariable Long id){
+            return ResponseEntity.ok(claimService.startReview(id));
+        }
+
+        @PostMapping("/{id}/approve")
+        public ResponseEntity<ClaimResponse> approveClaim(@PathVariable Long id){
+            return ResponseEntity.ok(claimService.approveClaim(id));
+        }
+
+        @PostMapping("/{id}/reject")
+        public ResponseEntity<ClaimResponse> rejectClaim(@PathVariable Long id){
+            return ResponseEntity.ok(claimService.rejectClaim(id));
+        }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<ClaimHistoryResponse>> getClaimHistory(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                claimService.getClaimHistory(id)
+        );
+    }
 }

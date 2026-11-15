@@ -1,0 +1,2 @@
+ALTER TABLE claim_schema.claims
+ADD COLUMN version BIGINT NOT NULL DEFAULT 0;

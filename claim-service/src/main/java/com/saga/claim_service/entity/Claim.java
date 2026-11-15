@@ -25,6 +25,10 @@ public class Claim {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(nullable = false, name = "claim_number", unique = true, length = 50)
     private String claimNumber;
 
