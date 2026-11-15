@@ -30,3 +30,21 @@ management:
     web:
       exposure:
         include: health,info
+services:
+  vehicle:
+    url: http://localhost:8081
+
+resilience4j:
+  retry:
+    instances:
+      vehicleService:
+        maxAttempts: 3
+        waitDuration: 1s
+
+  circuitbreaker:
+    instances:
+      vehicleService:
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
