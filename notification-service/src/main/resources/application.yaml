@@ -1,0 +1,36 @@
+
+spring:
+  application:
+    name: notification-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        spring.json.value.default.type: com.saga2.notification_service.event.ClaimSubmittedEvent
+        spring.json.trusted.packages: com.saga2.notification_service.event
+        spring.json.use.type.headers: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
+    properties:
+      "[mail.smtp.auth]": true
+      "[mail.smtp.starttls.enable]": true
+      "[mail.smtp.starttls.required]": true
+      "[mail.smtp.connectiontimeout]": 5000
+      "[mail.smtp.timeout]": 5000
+      "[mail.smtp.writetimeout]": 5000
+
+app:
+  notification:
+    test-recipient: ${TEST_EMAIL_RECIPIENT}
+
+server:
+  port: 8082
