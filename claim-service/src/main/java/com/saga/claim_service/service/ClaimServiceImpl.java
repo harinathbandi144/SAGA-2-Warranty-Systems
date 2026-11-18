@@ -11,6 +11,8 @@ import com.saga.claim_service.entity.Claim;
 import com.saga.claim_service.entity.ClaimStatusHistory;
 import com.saga.claim_service.enums.Status;
 import com.saga.claim_service.exception.ClaimNotFoundException;
+import com.saga.claim_service.kafka.event.ClaimSubmittedEvent;
+import com.saga.claim_service.kafka.producer.ClaimEventProducer;
 import com.saga.claim_service.repository.ClaimRepository;
 import com.saga.claim_service.repository.ClaimStatusHistoryRepository;
 import com.saga.claim_service.resilanace4j.VehicleEligibilityService;
@@ -33,10 +35,9 @@ public class ClaimServiceImpl implements ClaimService{
 
     private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
 
-    private final VehicleClient vehicleClient;
-
     private final VehicleEligibilityService vehicleEligibilityService;
 
+    private final ClaimEventProducer claimEventProducer;
 
     @Override
     @Transactional
@@ -121,7 +122,12 @@ public class ClaimServiceImpl implements ClaimService{
     @Override
     @Transactional
     public ClaimResponse submitClaim(Long id) {
-        return changeStatus(id, Status.DRAFT, Status.SUBMITTED);
+
+        ClaimResponse response = changeStatus(id, Status.DRAFT, Status.SUBMITTED);
+
+        claimEventProducer.publish(new ClaimSubmittedEvent(response.id(), response.vin(), response.status().name()));
+
+        return response;
     }
 
     @Override

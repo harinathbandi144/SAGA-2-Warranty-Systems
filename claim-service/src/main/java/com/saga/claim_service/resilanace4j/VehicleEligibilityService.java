@@ -18,7 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class VehicleEligibilityService {
 
-    private VehicleClient vehicleClient;
+    private final VehicleClient vehicleClient;
 
     @Autowired
     private CircuitBreakerRegistry circuitBreakerRegistry;
@@ -37,7 +37,21 @@ public class VehicleEligibilityService {
     }
 
     public WarrantyEligibilityResponse fallback(String vin, Exception ex){
-        throw  new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Vehicle Service is unavailable");
+//        throw  new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Vehicle Service is unavailable");
+        System.out.println("Actual Feign Error: " + ex.getMessage());
+
+        if (ex instanceof feign.FeignException.NotFound) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Vehicle not found: " + vin
+            );
+        }
+
+        throw new ResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Vehicle Service is unavailable",
+                ex
+        );
     }
 
 }
