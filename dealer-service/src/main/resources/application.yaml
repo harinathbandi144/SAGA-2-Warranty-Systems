@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: dealer-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/dealerdb
+    username: ${USERNAME}
+    password: ${PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: dealer_schema
+        format_sql: true
+
+  flyway:
+    enabled: true
+    schemas: dealer_schema
+    default-schema: dealer_schema
+    locations: classpath:db/migration
+server:
+  port: 8083
