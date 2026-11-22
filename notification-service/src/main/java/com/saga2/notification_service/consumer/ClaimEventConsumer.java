@@ -12,7 +12,11 @@ public class ClaimEventConsumer {
 
     private final EmailService emailService;
 
-    @KafkaListener(topics = "claim-events")
+    @KafkaListener(
+            topics = "claim-events",
+            groupId = "notification-service",
+            containerFactory = "claimKafkaListenerFactory"
+    )
     public void consumer(ClaimSubmittedEvent claimSubmittedEvent){
         System.out.println("Notification received for Claim ID: "+claimSubmittedEvent.claimId());
 

@@ -1,15 +1,19 @@
 spring:
   application:
     name: claim-service
-
+  cloud:
+    openfeign:
+      client:
+        config:
+          dealer-service:
+            loggerLevel: FULL
   datasource:
     url: jdbc:postgresql://localhost:5433/claimdb
     username: harinathbandi
     password: ${DB_PASSWORD}
-
   jpa:
     hibernate:
-      ddl-auto:
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -38,6 +42,14 @@ management:
 services:
   vehicle:
     url: http://localhost:8081
+  dealer:
+    url: http://localhost:8083
+  redis:
+    image: redis:7.4-alpine
+    container_name: saga2-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
 
 resilience4j:
   retry:
@@ -53,5 +65,15 @@ resilience4j:
         minimumNumberOfCalls: 5
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
+      dealerService:
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        ignoreExceptions:
+          - org.springframework.web.server.ResponseStatusException
 
 
+logging:
+  level:
+    com.saga.claim_service.client.service.DealerClient: DEBUG
