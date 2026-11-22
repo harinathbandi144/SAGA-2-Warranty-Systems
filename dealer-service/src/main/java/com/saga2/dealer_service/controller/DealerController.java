@@ -48,6 +48,7 @@ public class DealerController {
 
     @GetMapping("{dealerId}/eligibility")
     public ResponseEntity<DealerEligibilityResponse> checkEligibility(@PathVariable String dealerId){
-        return ResponseEntity.status(HttpStatus.FOUND).body(dealerService.checkEligibility(dealerId));
-    }
+
+        DealerEligibilityResponse response = dealerService.checkEligibility(dealerId);
+        return ResponseEntity.ok(response);    }
 }

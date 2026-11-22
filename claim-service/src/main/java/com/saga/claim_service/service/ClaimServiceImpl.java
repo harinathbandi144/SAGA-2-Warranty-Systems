@@ -1,6 +1,7 @@
 package com.saga.claim_service.service;
 
 
+import com.saga.claim_service.client.dto.DealerEligibilityResponse;
 import com.saga.claim_service.client.dto.WarrantyEligibilityResponse;
 import com.saga.claim_service.client.service.VehicleClient;
 import com.saga.claim_service.dto.ClaimHistoryResponse;
@@ -15,6 +16,7 @@ import com.saga.claim_service.kafka.event.ClaimSubmittedEvent;
 import com.saga.claim_service.kafka.producer.ClaimEventProducer;
 import com.saga.claim_service.repository.ClaimRepository;
 import com.saga.claim_service.repository.ClaimStatusHistoryRepository;
+import com.saga.claim_service.resilanace4j.DealerEligibilityService;
 import com.saga.claim_service.resilanace4j.VehicleEligibilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -39,9 +41,13 @@ public class ClaimServiceImpl implements ClaimService{
 
     private final ClaimEventProducer claimEventProducer;
 
+    private final DealerEligibilityService dealerEligibilityService;
+
     @Override
     @Transactional
     public ClaimResponse createClaim(CreateClaimRequest request) {
+
+        dealerEligibilityService.validateDealer(request.dealerId());
 
         WarrantyEligibilityResponse eligibilityResponse = vehicleEligibilityService.checkEligibility(request.vin());
 

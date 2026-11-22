@@ -3,7 +3,7 @@ package com.saga2.dealer_service.service;
 import com.saga2.dealer_service.dto.*;
 import com.saga2.dealer_service.entity.Dealer;
 
-public interface DealerService {
+public interface DealerService{
 
     DealerResponse createDealer(CreateDealerRequest createDealerRequest);
 
