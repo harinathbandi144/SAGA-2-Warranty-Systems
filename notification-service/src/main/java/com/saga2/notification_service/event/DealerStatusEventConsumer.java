@@ -1,5 +1,6 @@
 package com.saga2.notification_service.event;
 
+import com.saga2.notification_service.service.DealerNotificationProcessor;
 import com.saga2.notification_service.service.DealerStatusEmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DealerStatusEventConsumer {
 
-    private final DealerStatusEmailService emailService;
+    private final DealerNotificationProcessor processor;
 
     @KafkaListener(
             topics = "dealer-status-events",
@@ -20,9 +21,8 @@ public class DealerStatusEventConsumer {
     )
     public void consume(DealerStatusChangedEvent event) {
 
-        log.info("Dealer status changed: {} -> {}",
-                event.oldStatus(), event.newStatus());
+        log.info("Received dealer event: {}", event.eventId());
 
-        emailService.sendDealerStatusEmail(event);
+        processor.process(event);
     }
 }
