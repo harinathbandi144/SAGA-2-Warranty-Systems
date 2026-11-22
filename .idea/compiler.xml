@@ -10,8 +10,9 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.48/lombok-1.18.48.jar" />
         </processorPath>
-        <module name="claim-service" />
+        <module name="dealer-service" />
         <module name="vehicle-service" />
+        <module name="claim-service" />
         <module name="notification-service" />
       </profile>
     </annotationProcessing>
@@ -19,6 +20,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="claim-service" options="-parameters" />
+      <module name="dealer-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
       <module name="vehicle-service" options="-parameters" />
     </option>

@@ -1,18 +1,30 @@
-
 spring:
+  application:
+    name: notification-service
+
   kafka:
     bootstrap-servers: localhost:9092
 
     consumer:
       group-id: notification-service
       auto-offset-reset: earliest
-
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
 
       properties:
         spring.json.trusted.packages: com.saga2.notification_service.event
         spring.json.use.type.headers: false
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/notificationdb
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    enabled: true
+    schemas: notification_schema
+    default-schema: notification_schema
+    locations: classpath:db/migration
 
   mail:
     host: smtp.gmail.com
